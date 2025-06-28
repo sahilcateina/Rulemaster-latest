@@ -241,3 +241,7 @@ export const applyRules = async (req: Request, res: Response): Promise<void> => 
         res.status(500).json({ error: err.message });
     }
 };
+
+export function createRealmController(arg0: string, createRealmController: any) {
+    throw new Error('Function not implemented.');
+}

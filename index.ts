@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 // import realmRoutes from './routes/realm.route';
 import ruleRoutes from './src/routes/rules.route';
 import userRoutes from './src/routes/user.route';
+import realmRoutes from './src/routes/realm.route'
 // import groupRoutes from './routes/group.route';
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(bodyParser.json());
 // app.use('/api/realms', realmRoutes);
 app.use('/api/rules', ruleRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/realm', realmRoutes);
 // app.use('/api/groups', groupRoutes);
 
 app.listen(PORT, () => {
