@@ -7,6 +7,7 @@ import * as realmDao from '../dao/realm.dao';
 import { v4 as uuidv4 } from 'uuid';
 import { createClient } from '@supabase/supabase-js'; // Add this import
 import * as dao from '../dao/realm.dao';
+import { Profile } from '../types/User';
 
 
 interface TokenResponse {
@@ -22,10 +23,17 @@ const supabase = createClient(
 // For example:
 // import * as realmDao from './path/to/realmDao'; 
 
-export const createRealm = async (body: { realmId: string; name: string; createdAt:string}) => {
+export const createRealm = async (body: {
+    realmId: string; name: string; createdAt:string, userDetails:Profile
+}) => {
   console.log("Request body for realm creation:", body);
-
+const name = body.name
  const realmId = body.realmId || uuidv4();
+
+const userDetails =  body.userDetails
+
+console.log("userdetailsuserdetails",userDetails);
+
 
   try {
     const tokenResponse = await realmDao.getMarketToken();
@@ -182,11 +190,33 @@ export const createRealm = async (body: { realmId: string; name: string; created
       };
     }
 
+    
     // --- Post to localhost:4002/organisation ---
     try {
      
-      const organisationResponse = await dao.createRealmDao(body);
-      console.log("Organisation creation successful:", organisationResponse);
+      const organisationResponse = await dao.createRealmDao(realmId,body);
+      console.log("Organisation creation successful:", organisationResponse);      
+
+
+        const groupResponse = await createGroup(name);
+        console.log("rgoupResponsergoupResponse",groupResponse);
+
+        const groupName = 'administrative';
+        const groupDaoResponse = await dao.createGroupDao(groupResponse,name, groupName);
+        console.log("groupDaoResponse creation successful:", groupDaoResponse);
+
+       const userResponse = await createUser(name,groupResponse,body.userDetails);
+        console.log("userResponseuserResponse",userResponse);
+
+          const userDaoResponse = await dao.createUserDao(userResponse,groupResponse, userDetails);
+        console.log("groupDaoResponse creation successful:", userDaoResponse);
+
+         const roleResponse = await createRole(name,groupResponse,userResponse);
+        console.log("roleResponseroleResponse",roleResponse);
+        
+        const rolesDaoResponse = await dao.createRolesDao(roleResponse,groupName,name, userDetails);
+        console.log("groupDaoResponse creation successful:", userDaoResponse);
+
 
       return {
         status: 'success',
@@ -210,6 +240,7 @@ export const createRealm = async (body: { realmId: string; name: string; created
       };
     }
 
+
   } catch (error: any) {
     // This catches errors from realmDao.getMarketToken() or other unexpected issues
     console.error("Unexpected error in createRealm function:", error);
@@ -220,3 +251,136 @@ export const createRealm = async (body: { realmId: string; name: string; created
     };
   }
 };
+
+
+
+
+export const createGroup = async (name:string): Promise<string> => {
+  const groupName = 'administrative';
+ const tokenResponse = await realmDao.getMarketToken();
+  const typedTokenResponse = tokenResponse as TokenResponse;
+
+    const accessToken = typedTokenResponse.token;
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    'Content-Type': 'application/json',
+  };
+
+  const keycloakBase = `${process.env.KEYCLOAK_URL}/admin/realms/${name}`; // Replace with actual 
+  
+  console.log("keycloakBasekeycloakBase",keycloakBase);
+  
+
+  // Check if group exists
+  const res = await axios.get(`${keycloakBase}/groups`, { headers });
+  const existingGroup = res.data.find((g: any) => g.name === groupName);
+
+  if (existingGroup) return existingGroup.id;
+
+  // Create group
+  await axios.post(`${keycloakBase}/groups`, { name: groupName }, { headers });
+
+  // Fetch again to get the new group's ID
+  const updatedGroups = await axios.get(`${keycloakBase}/groups`, { headers });
+  const newGroup = updatedGroups.data.find((g: any) => g.name === groupName);
+
+  return newGroup?.id;
+};
+
+
+export const createUser = async (realmName:string,groupId:string,user:Profile) => {
+
+    console.log("userrrrrrr",user);
+    
+  const tokenResponse = await realmDao.getMarketToken();
+  const typedTokenResponse = tokenResponse as TokenResponse;
+
+    const accessToken = typedTokenResponse.token;
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    'Content-Type': 'application/json',
+  };
+
+ 
+  const userPayload = {
+    username:user.first_name,
+    email: user.email,
+    firstName: user.first_name,
+    lastName: user.last_name,
+    enabled: true,
+ 
+  };
+
+  console.log('Creating user:', userPayload);
+
+  const keycloakBase = `${process.env.KEYCLOAK_URL}/admin/realms/${realmName}`; // Replace with actual values
+
+  await axios.post(`${keycloakBase}/users`, userPayload, { headers });
+
+  // Retrieve user ID by querying the username
+  const usersResponse = await axios.get(`${keycloakBase}/users?username=${userPayload.firstName}`, { headers });
+  console.log("usersResponseusersResponse",usersResponse.data[0]);
+  
+  const createdUser = usersResponse.data[0].id;
+ await axios.put(`${keycloakBase}/users/${createdUser}/groups/${groupId}`, {}, { headers });
+console.log(`Role '${createdUser}' assigned to user '${groupId}' successfully.`);
+
+  console.log('User created: in service', createdUser);
+
+ return createdUser;
+};
+
+
+export const createRole = async (realmName: string, groupId: string, userId: string) => {
+  const tokenResponse = await realmDao.getMarketToken();
+  const typedTokenResponse = tokenResponse as TokenResponse;
+  const accessToken = typedTokenResponse.token;
+
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    'Content-Type': 'application/json',
+  };
+
+  const roleName = "realmAdmin";
+  const keycloakBase = `${process.env.KEYCLOAK_URL}/admin/realms/${realmName}`;
+
+  try {
+    // Attempt to create the role
+    await axios.post(`${keycloakBase}/roles`, { name: roleName }, { headers });
+    console.log(`Role '${roleName}' created successfully.`);
+  } catch (err: any) {
+    if (err.response?.status === 409) {
+      console.warn(`Role '${roleName}' already exists in realm '${realmName}'. Proceeding with assignment.`);
+    } else if (err.response?.status === 404) {
+      console.error(`Attempted to create role '${roleName}' but received 404. Keycloak base URL or realm might be incorrect.`);
+      throw err;
+    } else {
+      console.error(`Error creating role '${roleName}' in realm '${realmName}':`, err);
+      throw err;
+    }
+  }
+
+  try {
+      const role = (await axios.get(`${keycloakBase}/roles/${roleName}`, { headers })).data;
+        console.log('Role data:', role);
+    // Assign role to group and user (whether newly created or already existing)
+    const rolePayload = [{ name: roleName }];
+    
+    await axios.post(`${keycloakBase}/groups/${groupId}/role-mappings/realm`, [role], { headers });
+    console.log(`Role '${roleName}' assigned to group '${groupId}' successfully.`);
+    
+    await axios.post(`${keycloakBase}/users/${userId}/role-mappings/realm`, [role], { headers });
+    console.log(`Role '${roleName}' assigned to user '${userId}' successfully.`);
+    
+    return roleName;
+  } catch (err: any) {
+    console.error(`Error assigning role '${roleName}':`, err);
+    throw err;
+  }
+};
+
+
+export const getRealmsevice = async (id:string) => {
+    return await dao.getRealmDao(id);
+};
+ 
