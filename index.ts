@@ -9,6 +9,7 @@ import userRoutes from './src/routes/user.route';
 import realmRoutes from './src/routes/realm.route'
 // import groupRoutes from './routes/group.route';
 
+
 dotenv.config();
 
 const app = express();
