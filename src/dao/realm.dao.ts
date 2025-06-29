@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { createClient } from '@supabase/supabase-js';
-import { body } from '../types/User';
+import { body,Profile } from '../types/User';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -91,13 +91,100 @@ export const getMarketToken = async (): Promise<TokenResponse> => {
   }
 };
 
-export const createRealmDao = async (body: body) => {
+export const createRealmDao = async (realmId:string,body: body) => {
   try {
     const result = await supabase
       .from('organization')
       .insert({
+        id:realmId,
         name:body.name,
         created_at:new Date().toISOString().replace('T', ' ').split('.')[0],
+      })
+      .select();
+    
+    if (result.error) {
+      console.error('Supabase error creating user:', result.error);
+      throw new Error(`Failed to create user: ${result.error.message}`);
+    }
+    
+    return result;
+    
+  } catch (error: any) {
+    console.error('Error in createUser:', error.message);
+    throw error;
+  }
+};
+
+
+export const createGroupDao = async (groupResponse:string,realmName:string, groupName:string) => {
+  try {
+    const result = await supabase
+      .from('groups')
+      .insert({
+        id:groupResponse,
+        tenant_name:realmName,
+        group_name:groupName,
+        created_at:new Date().toISOString().replace('T', ' ').split('.')[0],
+      })
+      .select()
+      .single()
+    
+    if (result.error) {
+      console.error('Supabase error creating user:', result.error);
+      throw new Error(`Failed to create user: ${result.error.message}`);
+    }
+    
+    return result;
+    
+  } catch (error: any) {
+    console.error('Error in createUser:', error.message);
+    throw error;
+  }
+};
+
+export const createUserDao = async (id:string, groupId:string,userDetail:Profile) => {
+
+    console.log("userDetailuserDetailuserDetail",userDetail,id,groupId);
+    
+  try {
+    const result = await supabase
+      .from('users')
+      .insert({
+        id:id,
+        group_id:groupId,
+        first_name:userDetail.first_name,
+        last_name:userDetail.last_name,
+        email:userDetail.email,
+        created_at:new Date().toISOString().replace('T', ' ').split('.')[0],
+        admin_id:userDetail.userId
+      })
+      .select();
+    
+    if (result.error) {
+      console.error('Supabase error creating user:', result.error);
+      throw new Error(`Failed to create user: ${result.error.message}`);
+    }
+    
+    return result;
+    
+  } catch (error: any) {
+    console.error('Error in createUser:', error.message);
+    throw error;
+  }
+};
+
+export const createRolesDao = async (roleName:string, groupName:string,realmName:string,userDetail:Profile) => {
+
+    
+  try {
+    const result = await supabase
+      .from('roles')
+      .insert({
+        role_name:roleName,
+        group_name:groupName,
+        tenant_name:realmName,
+        created_at:new Date().toISOString().replace('T', ' ').split('.')[0],
+        admin_id:userDetail.userId
       })
       .select();
     
@@ -131,4 +218,12 @@ export const validateToken = async (token: string): Promise<boolean> => {
     console.error('Token validation failed:', error);
     return false;
   }
+};
+
+export const getRealmDao = async (id:string) => {
+  return await supabase
+    .from('users')
+    .select("*")
+    .eq("admin_id",id)
+    .order('created_at', { ascending: false });
 };

@@ -8,16 +8,7 @@ import * as service from '../services/realm.service';
 export const createRealmController = async (req: Request, res: Response): Promise<void> => {
   try {
     const realmData = req.body;
-    
-    // Validate required fields
-    // if (!realmData.realmId || !realmData.realmName) {
-    //   res.status(400).json({ 
-    //     status: 400,
-    //     error: true,
-    //     message: 'Missing required fields: realmId and realmName are required' 
-    //   });
-    //   return;
-    // }
+
 
     const result = await service.createRealm(realmData);
     
@@ -50,3 +41,13 @@ export const createRealmController = async (req: Request, res: Response): Promis
     });
   }
 };
+
+export const getRealms = async (req: Request, res: Response) => {
+    try {
+      const { data, error } = await service.getRealmsevice(req.params.id,);
+      if (error) throw error;
+      res.json({ status: 200, data });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  };

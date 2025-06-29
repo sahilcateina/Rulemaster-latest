@@ -14,4 +14,16 @@ export interface User {
     created_at?: string;
   }
 
+
+ export interface Profile {
+  username:string
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  userId: string;
+  password:string
+
+}
+
   
