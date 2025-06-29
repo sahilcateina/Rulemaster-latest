@@ -8,6 +8,7 @@ import ruleRoutes from './src/routes/rules.route';
 import userRoutes from './src/routes/user.route';
 import realmRoutes from './src/routes/realm.route'
 import groupRoutes from './src/routes/group.route';
+import roleRoutes from './src/routes/role.route';
 
 
 dotenv.config();
@@ -24,6 +25,7 @@ app.use('/api/rules', ruleRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/realm', realmRoutes);
 app.use('/api/groups', groupRoutes);
+app.use('/api/roles', roleRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
