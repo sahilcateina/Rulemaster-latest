@@ -9,8 +9,12 @@ export const createRealmController = async (req: Request, res: Response): Promis
   try {
     const realmData = req.body;
 
+    console.log("realmDatarealmDatarealmData",realmData);
+    
 
-    const result = await service.createRealm(realmData);
+    const userId = realmData.userDetails.userId
+
+    const result = await service.createRealm(realmData,userId);
     
     // Check if the service returned an error
     if (result.error) {

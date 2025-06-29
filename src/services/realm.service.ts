@@ -25,7 +25,7 @@ const supabase = createClient(
 
 export const createRealm = async (body: {
     realmId: string; name: string; createdAt:string, userDetails:Profile
-}) => {
+},userId:string) => {
   console.log("Request body for realm creation:", body);
 const name = body.name
  const realmId = body.realmId || uuidv4();
@@ -194,7 +194,7 @@ console.log("userdetailsuserdetails",userDetails);
     // --- Post to localhost:4002/organisation ---
     try {
      
-      const organisationResponse = await dao.createRealmDao(realmId,body);
+      const organisationResponse = await dao.createRealmDao(realmId,body, userId);
       console.log("Organisation creation successful:", organisationResponse);      
 
 
@@ -202,7 +202,7 @@ console.log("userdetailsuserdetails",userDetails);
         console.log("rgoupResponsergoupResponse",groupResponse);
 
         const groupName = 'administrative';
-        const groupDaoResponse = await dao.createGroupDao(groupResponse,name, groupName);
+        const groupDaoResponse = await dao.createGroupDao(groupResponse,name, groupName,userId);
         console.log("groupDaoResponse creation successful:", groupDaoResponse);
 
        const userResponse = await createUser(name,groupResponse,body.userDetails);

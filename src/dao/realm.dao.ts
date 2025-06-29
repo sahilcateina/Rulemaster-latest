@@ -91,7 +91,7 @@ export const getMarketToken = async (): Promise<TokenResponse> => {
   }
 };
 
-export const createRealmDao = async (realmId:string,body: body) => {
+export const createRealmDao = async (realmId:string,body: body,userId:string) => {
   try {
     const result = await supabase
       .from('organization')
@@ -99,6 +99,7 @@ export const createRealmDao = async (realmId:string,body: body) => {
         id:realmId,
         name:body.name,
         created_at:new Date().toISOString().replace('T', ' ').split('.')[0],
+        admin_id:userId
       })
       .select();
     
@@ -116,7 +117,7 @@ export const createRealmDao = async (realmId:string,body: body) => {
 };
 
 
-export const createGroupDao = async (groupResponse:string,realmName:string, groupName:string) => {
+export const createGroupDao = async (groupResponse:string,realmName:string, groupName:string,userId:string) => {
   try {
     const result = await supabase
       .from('groups')
@@ -125,6 +126,7 @@ export const createGroupDao = async (groupResponse:string,realmName:string, grou
         tenant_name:realmName,
         group_name:groupName,
         created_at:new Date().toISOString().replace('T', ' ').split('.')[0],
+        admin_id:userId
       })
       .select()
       .single()
@@ -222,7 +224,7 @@ export const validateToken = async (token: string): Promise<boolean> => {
 
 export const getRealmDao = async (id:string) => {
   return await supabase
-    .from('users')
+    .from('organization')
     .select("*")
     .eq("admin_id",id)
     .order('created_at', { ascending: false });
