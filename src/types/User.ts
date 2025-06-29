@@ -6,4 +6,12 @@ export interface User {
     group_id: string;
     created_at?: string;
   }
+
+
+  export interface body {
+    createdAt: any;
+    name: string;
+    created_at?: string;
+  }
+
   
