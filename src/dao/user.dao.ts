@@ -17,13 +17,11 @@ export const createUser = async (user: User) => {
     .single();
 };
 
-export const getUsers = async () => {
+export const getUsers = async (id:string) => {
   return await supabase
     .from('users')
-    .select(`
-      id, first_name, last_name, email, created_at,
-      group:group_id (id, name)
-    `)
+    .select("*")
+    .eq("admin_id",id)
     .order('created_at', { ascending: false });
 };
 

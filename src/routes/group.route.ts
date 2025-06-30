@@ -3,6 +3,6 @@ import { getGroupById } from '../controllers/group.controller';
 
 const router = express.Router();
 
-router.get('/:id', getGroupById);
+router.get('/getGroups/:id', getGroupById);
 
 export default router;

@@ -14,7 +14,7 @@ const createUser = async (req: Request, res: Response) => {
 
 export const getUsers = async (req: Request, res: Response) => {
     try {
-      const { data, error } = await service.getUsers();
+      const { data, error } = await service.getUsers(req.params.id);
       if (error) throw error;
       res.json({ status: 200, data });
     } catch (err: any) {

@@ -5,8 +5,8 @@ export const createUser = async (user: User) => {
     return await dao.createUser(user);
 };
 
-export const getUsers = async () => {
-    return await dao.getUsers();
+export const getUsers = async (id:string) => {
+    return await dao.getUsers(id);
 };
 
 export const updateUser = async (id: string, updates: Partial<User>) => {

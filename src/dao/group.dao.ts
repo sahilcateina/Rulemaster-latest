@@ -7,8 +7,7 @@ export const getGroupById = async (id: string) => {
   const result = await supabase
     .from('groups')
     .select('*')
-    .eq('id', id)
-    .single();
+    .eq('admin_id', id)
 
   // Handle the case where no group is found
   if (result.error && result.error.code === 'PGRST116') {
