@@ -2,6 +2,7 @@ import { Engine } from 'json-rules-engine';
 import * as rulesDAO from '../dao/rules.dao';
 import { v4 as uuidv4 } from 'uuid';
 import * as NLPService from './nlp.service';
+import { normalizeOperators } from '../utils/rule.utils';
 
 export interface ParsedRule {
     name: string;
@@ -51,22 +52,43 @@ export const updateRule = async (id: string, updates: Partial<Rule>) => rulesDAO
 export const deleteRule = async (id: string) => rulesDAO.deleteRule(id);
 export const getAllRules = async (tenantId?: string) => rulesDAO.getAllRules(tenantId);
 
+// export const applyRules = async (tenantId: string, inputData: any) => {
+//     const { data: rules, error } = await rulesDAO.getAllRules(tenantId);
+//     if (error) throw new Error('Failed to fetch rules');
+
+//     const engine = new Engine();
+
+//     for (const rule of rules) {
+//         engine.addRule({
+//             conditions: rule.conditions,
+//             event: rule.actions,
+//             name: rule.name,
+//             priority: rule.priority
+//         });
+//     }
+
+//     const results = await engine.run(inputData);
+//     return results.events;
+// };
+
+
 export const applyRules = async (tenantId: string, inputData: any) => {
     const { data: rules, error } = await rulesDAO.getAllRules(tenantId);
     if (error) throw new Error('Failed to fetch rules');
-
+  
     const engine = new Engine();
-
+  
     for (const rule of rules) {
-        engine.addRule({
-            conditions: rule.conditions,
-            event: rule.actions,
-            name: rule.name,
-            priority: rule.priority
-        });
+      const normalizedConditions = normalizeOperators(rule.conditions);
+  
+      engine.addRule({
+        conditions: normalizedConditions,
+        event: rule.actions,
+        name: rule.name,
+        priority: rule.priority
+      });
     }
-
+  
     const results = await engine.run(inputData);
     return results.events;
-};
-
+  };
