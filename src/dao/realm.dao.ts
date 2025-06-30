@@ -125,7 +125,7 @@ export const createGroupDao = async (groupResponse:string,realmName:string, grou
       .insert({
         id:groupResponse,
         tenant_name:realmName,
-        tenent_id:realmId,
+        tenant_id:realmId,
         group_name:groupName,
         created_at:new Date().toISOString().replace('T', ' ').split('.')[0],
         admin_id:userId
