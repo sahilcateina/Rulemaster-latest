@@ -16,3 +16,4 @@ export const getGroupById = async (id: string) => {
 
   return result;
 };
+
