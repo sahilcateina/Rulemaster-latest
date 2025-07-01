@@ -7,6 +7,6 @@ export const getRoleById = async (id: string) => {
   return await supabase
     .from('roles')
     .select('*')
-    .eq('id', id)
-    .single();
+    .eq('admin_id', id)
+    // .single();
 };
