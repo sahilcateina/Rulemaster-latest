@@ -202,20 +202,20 @@ console.log("userdetailsuserdetails",userDetails);
         console.log("rgoupResponsergoupResponse",groupResponse);
 
         const groupName = 'administrative';
-        const groupDaoResponse = await dao.createGroupDao(groupResponse,name, groupName,userId);
+        const groupDaoResponse = await dao.createGroupDao(groupResponse,name, groupName,userId,realmId);
         console.log("groupDaoResponse creation successful:", groupDaoResponse);
 
-       const userResponse = await createUser(name,groupResponse,body.userDetails);
-        console.log("userResponseuserResponse",userResponse);
+    //    const userResponse = await createUser(name,groupResponse,body.userDetails);
+    //     console.log("userResponseuserResponse",userResponse);
 
-          const userDaoResponse = await dao.createUserDao(userResponse,groupResponse, userDetails);
-        console.log("groupDaoResponse creation successful:", userDaoResponse);
+    //       const userDaoResponse = await dao.createUserDao(userResponse,groupResponse, userDetails);
+    //     console.log("groupDaoResponse creation successful:", userDaoResponse);
 
-         const roleResponse = await createRole(name,groupResponse,userResponse);
+         const roleResponse = await createRole(name,groupResponse);
         console.log("roleResponseroleResponse",roleResponse);
         
-        const rolesDaoResponse = await dao.createRolesDao(roleResponse,groupName,name, userDetails);
-        console.log("groupDaoResponse creation successful:", userDaoResponse);
+        const rolesDaoResponse = await dao.createRolesDao(roleResponse,groupName,name, userDetails,realmId);
+        console.log("groupDaoResponse creation successful:",);
 
 
       return {
@@ -331,7 +331,7 @@ console.log(`Role '${createdUser}' assigned to user '${groupId}' successfully.`)
 };
 
 
-export const createRole = async (realmName: string, groupId: string, userId: string) => {
+export const createRole = async (realmName: string, groupId: string) => {
   const tokenResponse = await realmDao.getMarketToken();
   const typedTokenResponse = tokenResponse as TokenResponse;
   const accessToken = typedTokenResponse.token;
@@ -369,8 +369,8 @@ export const createRole = async (realmName: string, groupId: string, userId: str
     await axios.post(`${keycloakBase}/groups/${groupId}/role-mappings/realm`, [role], { headers });
     console.log(`Role '${roleName}' assigned to group '${groupId}' successfully.`);
     
-    await axios.post(`${keycloakBase}/users/${userId}/role-mappings/realm`, [role], { headers });
-    console.log(`Role '${roleName}' assigned to user '${userId}' successfully.`);
+    // await axios.post(`${keycloakBase}/users/${userId}/role-mappings/realm`, [role], { headers });
+    // console.log(`Role '${roleName}' assigned to user '${userId}' successfully.`);
     
     return roleName;
   } catch (err: any) {

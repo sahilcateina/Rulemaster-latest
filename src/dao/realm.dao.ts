@@ -101,7 +101,8 @@ export const createRealmDao = async (realmId:string,body: body,userId:string) =>
         created_at:new Date().toISOString().replace('T', ' ').split('.')[0],
         admin_id:userId
       })
-      .select();
+      .select()
+      .single()
     
     if (result.error) {
       console.error('Supabase error creating user:', result.error);
@@ -117,13 +118,14 @@ export const createRealmDao = async (realmId:string,body: body,userId:string) =>
 };
 
 
-export const createGroupDao = async (groupResponse:string,realmName:string, groupName:string,userId:string) => {
+export const createGroupDao = async (groupResponse:string,realmName:string, groupName:string,userId:string,realmId:string) => {
   try {
     const result = await supabase
       .from('groups')
       .insert({
         id:groupResponse,
         tenant_name:realmName,
+        tenant_id:realmId,
         group_name:groupName,
         created_at:new Date().toISOString().replace('T', ' ').split('.')[0],
         admin_id:userId
@@ -175,7 +177,7 @@ export const createUserDao = async (id:string, groupId:string,userDetail:Profile
   }
 };
 
-export const createRolesDao = async (roleName:string, groupName:string,realmName:string,userDetail:Profile) => {
+export const createRolesDao = async (roleName:string, groupName:string,realmName:string,userDetail:Profile,realmId:string) => {
 
     
   try {
@@ -184,6 +186,7 @@ export const createRolesDao = async (roleName:string, groupName:string,realmName
       .insert({
         role_name:roleName,
         group_name:groupName,
+        tenant_id:realmId,
         tenant_name:realmName,
         created_at:new Date().toISOString().replace('T', ' ').split('.')[0],
         admin_id:userDetail.userId
