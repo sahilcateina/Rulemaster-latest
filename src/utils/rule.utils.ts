@@ -29,3 +29,43 @@ export const normalizeOperators = (conditions: any): any => {
     return normalizeGroup(conditions);
   };
   
+
+
+
+
+
+// export const normalizeOperators = (conditions: any): any => {
+//   if (!conditions) return conditions;
+  
+//   if (Array.isArray(conditions)) {
+//     return conditions.map(normalizeOperators);
+//   }
+  
+//   if (typeof conditions === 'object') {
+//     const normalized: any = {};
+//     for (const key in conditions) {
+//       if (key === 'operator') {
+//         normalized[key] = mapOperator(conditions[key]);
+//       } else {
+//         normalized[key] = normalizeOperators(conditions[key]);
+//       }
+//     }
+//     return normalized;
+//   }
+  
+//   return conditions;
+// };
+
+// const mapOperator = (op: string): string => {
+//   const operatorMap: Record<string, string> = {
+//     'greater than': 'greaterThan',
+//     'less than': 'lessThan',
+//     'equal to': 'equal',
+//     'not equal to': 'notEqual',
+//     '>': 'greaterThan',
+//     '<': 'lessThan',
+//     '==': 'equal',
+//     '!=': 'notEqual'
+//   };
+//   return operatorMap[op.toLowerCase()] || op;
+// };
