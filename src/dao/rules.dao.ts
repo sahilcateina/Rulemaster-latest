@@ -33,7 +33,7 @@ export const getAllRules = async (tenantId?: string) => {
   let query = supabase
     .from('rules')
     .select('*')
-    .eq('is_active', true)
+    // .eq('is_active', true)
     .order('priority', { ascending: true });
 
   if (tenantId) {
